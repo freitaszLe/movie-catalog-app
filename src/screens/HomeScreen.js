@@ -1,30 +1,218 @@
-import React from "react";
-import {SafeAreaView, View, Text, StyleSheet, TouchableOpacity} from "react-native";
-import { SafeAreaFrameContext } from "react-native-safe-area-context";
+import React, {useEffect, useState} from "react";
+import {View, StyleSheet, ImageBackground, Text, Dimensions, ActivityIndicator, ScrollView} from "react-native";
+import Header from "../components/Header";
+import {getPopularMovies} from "../api/api";
 
-export default function HomeScreen() {
-    function handlePress() {
-        console.log("Botão clicado");
-    }
+const {width} = Dimensions.get('window');
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}> HomeScreen</Text>
-                <Text style={styles.subtitle}> View inicial</Text>
-                <TouchableOpacity style={styles.button} onPress={handlePress}>
-                    <Text style={styles.buttonText}>Pressione aqui</Text>
-                </TouchableOpacity>
+export default function HomeScreen(){
+  const [featuredMovie, setFeaturedMovie] = useState(null);
+  const[loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFeaturedMovie(){
+      try{
+        const movies = await getPopularMovies();
+        if (movies && movies.lenght > 0) {
+          setFeaturedMovie(movies [0]);
+        }
+
+      } catch (error) {
+        console.error("Erro ao buscar filme em destaque:",error);
+
+      }finally{
+        setLoading(false);
+      }
+      
+    } fetchFeaturedMovie();
+  } , []);
+  return (
+    <View style = {StyleSheet.container}>
+      <Header title= "Catálogo de Filmes"/>
+      <View style={StyleSheet.heroContainer}>
+        {loading ? (
+          <View style={StyleSheet.loadingHero}>
+            <ActivityIndicator size = "large" color = "#ff8800ff" />
+            <Text size={styles.loadingText}>Carregando filme em destaque...</Text>
+          </View>
+        ):featuredMovie ? (
+          <ImageBackground
+          source={{
+            uri: `https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path || featuredMovie.poster_path}`
+            }}
+              style={styles.hero}
+              resizeMode="cover"
+          >
+            <View style={styles.gradientOverlay}/>
+            <View style={styles.heroContent}>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>EM DESTAQUE</Text>
+              </View>
+
+              <Text style={styles.heroTitle}>{featuredMovie.title}</Text>
+              <Text style={styles.heroSubtitle} numberOfLines={2}>
+                {featuredMovie.overview || "Descubra os melhores filmes do MOMENTO"}
+              </Text>
+
+              <View style={styles.heroInfo}>
+                <View style={styles.ratingBadge}>
+                  <Text style={styles.ratingText}> estrela{featuredMovie.vote_average?.toFixed(1)}</Text>
+                </View>
+                <Text style={styles.yearText}>
+                  {featuredMovie.release_date ? new Date(featuredMovie.release_date).getFullYear(): ''}
+                </Text>
+                <Text style = {styles.genreText}>
+                  {featuredMovie.adult ? '18+' : 'Livre'} Popular 
+                </Text>              
+              </View>
             </View>
-        </SafeAreaView>
-    );
+            <View style = {styles.bottomFade} />
+            </ImageBackground>
+        ) : (
+          <View style={styles.errorHero}>
+            <Text style={styles.errorText}>Erro ao carregar filme em destaque</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  )
 }
 
+
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#000", },
-    content: {flex: 1,alignItems: "center",justifyContent: "center",padding : 20,},
-    title: {color: "#FFF",fontSize: 24,fontWeight: "bold",marginbottom: 8,},
-    subtitle: {color: "#bbb",fontSize: 14,marginBottom: 20,textAlign: "center",},
-    button: {backgroundColor: "#ff8800ff",paddingVertical : 12,paddingHorizontal: 18,borderRadius: 8,},
-    buttonText: {color: "#fff",fontSize: 16,fontWeight: "600",},
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  heroContainer: {
+    width: "100%",
+    height: 300,
+    backgroundColor: "#fff",
+    padding: 10,
+    marginBottom: 10,
+  },
+  hero: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-end",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  loadingHero: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 16,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: "#666",
+    fontSize: 14,
+  },
+  errorHero: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 16,
+  },
+  errorText: {
+    color: "#666",
+    fontSize: 16,
+  },
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    background: "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)",
+  },
+  heroContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: 30,
+  },
+  badge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#ff8800ff",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  heroTitle: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  heroSubtitle: {
+    color: "#e0e0e0",
+    fontSize: 16,
+    marginBottom: 16,
+    opacity: 0.9,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  heroInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  ratingBadge: {
+    backgroundColor: "rgba(255, 215, 0, 0.9)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  ratingText: {
+    color: "#000",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  yearText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  genreText: {
+    color: "#ccc",
+    fontSize: 14,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  bottomFade: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    backgroundColor: "transparent",
+    background: "linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.8) 100%)",
+  },
 });
