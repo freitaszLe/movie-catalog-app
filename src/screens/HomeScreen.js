@@ -1,83 +1,90 @@
-import React, {useEffect, useState} from "react";
-import {View, StyleSheet, ImageBackground, Text, Dimensions, ActivityIndicator, ScrollView} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ImageBackground, Text, Dimensions, ActivityIndicator, ScrollView } from "react-native";
 import Header from "../components/Header";
-import {getPopularMovies} from "../api/api";
+import MoviesScroll from "../components/MoviesScroll";
+import Footer from "../components/Footer";
+import { getPopularMovies } from "../api/api";
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-export default function HomeScreen(){
+export default function HomeScreen() {
   const [featuredMovie, setFeaturedMovie] = useState(null);
-  const[loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchFeaturedMovie(){
-      try{
+    async function fetchFeaturedMovie() {
+      try {
         const movies = await getPopularMovies();
-        if (movies && movies.lenght > 0) {
-          setFeaturedMovie(movies [0]);
-        }
-
+        if (movies && movies.length > 0) {
+          setFeaturedMovie(movies[0]);
+        } 
       } catch (error) {
-        console.error("Erro ao buscar filme em destaque:",error);
-
-      }finally{
+        console.error("Erro ao buscar filme em destaque:", error);
+      } finally {
         setLoading(false);
       }
-      
-    } fetchFeaturedMovie();
-  } , []);
+    }
+    fetchFeaturedMovie();
+  }, []);
+
   return (
-    <View style = {StyleSheet.container}>
-      <Header title= "Catálogo de Filmes"/>
-      <View style={StyleSheet.heroContainer}>
+    <View style={styles.container}>
+      <Header title="🎬 Catálogo de Filmes" />
+
+      <View style={styles.heroContainer}>
         {loading ? (
-          <View style={StyleSheet.loadingHero}>
-            <ActivityIndicator size = "large" color = "#ff8800ff" />
-            <Text size={styles.loadingText}>Carregando filme em destaque...</Text>
+          <View style={styles.loadingHero}>
+            <ActivityIndicator size="large" color="#e50914" />
+            <Text style={styles.loadingText}>Carregando filme em destaque...</Text>
           </View>
-        ):featuredMovie ? (
+        ) : featuredMovie ? (
           <ImageBackground
-          source={{
-            uri: `https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path || featuredMovie.poster_path}`
+            source={{ 
+              uri: `https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path || featuredMovie.poster_path}` 
             }}
-              style={styles.hero}
-              resizeMode="cover"
+            style={styles.hero}
+            resizeMode="cover"
           >
-            <View style={styles.gradientOverlay}/>
+  
+            <View style={styles.gradientOverlay} />
+            
             <View style={styles.heroContent}>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>EM DESTAQUE</Text>
               </View>
-
+              
               <Text style={styles.heroTitle}>{featuredMovie.title}</Text>
               <Text style={styles.heroSubtitle} numberOfLines={2}>
-                {featuredMovie.overview || "Descubra os melhores filmes do MOMENTO"}
+                {featuredMovie.overview || "Descubra os melhores filmes do momento"}
               </Text>
-
+              
               <View style={styles.heroInfo}>
                 <View style={styles.ratingBadge}>
-                  <Text style={styles.ratingText}> estrela{featuredMovie.vote_average?.toFixed(1)}</Text>
+                  <Text style={styles.ratingText}>⭐ {featuredMovie.vote_average?.toFixed(1)}</Text>
                 </View>
                 <Text style={styles.yearText}>
-                  {featuredMovie.release_date ? new Date(featuredMovie.release_date).getFullYear(): ''}
+                  {featuredMovie.release_date ? new Date(featuredMovie.release_date).getFullYear() : ''}
                 </Text>
-                <Text style = {styles.genreText}>
-                  {featuredMovie.adult ? '18+' : 'Livre'} Popular 
-                </Text>              
+                <Text style={styles.genreText}>
+                  {featuredMovie.adult ? '18+' : 'Livre'} • Popular
+                </Text>
               </View>
             </View>
-            <View style = {styles.bottomFade} />
-            </ImageBackground>
+
+            <View style={styles.bottomFade} />
+          </ImageBackground>
         ) : (
           <View style={styles.errorHero}>
             <Text style={styles.errorText}>Erro ao carregar filme em destaque</Text>
           </View>
         )}
       </View>
-    </View>
-  )
-}
 
+      <MoviesScroll />
+      <Footer />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -145,7 +152,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignSelf: "flex-start",
-    backgroundColor: "#ff8800ff",
+    backgroundColor: "#e50914",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
