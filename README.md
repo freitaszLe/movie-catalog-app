@@ -36,7 +36,7 @@ O projeto tem como objetivo apresentar uma interface moderna e responsiva, permi
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/movie-catalog-app.git
+git clone https://github.com/freitaszLe/movie-catalog-app.git
 
 # Acesse o diretório
 cd movie-catalog-app
