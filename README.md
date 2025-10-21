@@ -49,3 +49,13 @@ TMDB_API_KEY=sua_chave_aqui
 
 # Inicie o app
 npm start
+```
+---
+
+## 🧠 Aprendizados
+Durante o desenvolvimento deste projeto, foram explorados conceitos importantes:
+
+- Consumo de APIs REST com Axios
+- Gerenciamento de estado e hooks do React
+- Navegação em pilha e abas com React Navigation
+- Estruturação e boas práticas em projetos React mobile
